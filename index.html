@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spy Mission</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #fff; /* White text */
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            margin: 0;
+            overflow: hidden;
+        }
+        .hidden {
+            display: none;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 15px 30px;
+            border: 2px solid #4CAF50;
+            cursor: pointer;
+            font-size: 24px;
+            margin-top: 20px;
+            border-radius: 10px;
+            transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.1);
+            background-color: #45a049;
+            box-shadow: 0 0 10px rgba(0, 128, 0, 0.6);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 40px;
+            border: 2px solid #4CAF50;
+            width: 350px;
+            text-align: center;
+            cursor: pointer;
+            margin: 10px auto;
+            transition: transform 0.5s ease-in-out, background-color 0.3s, box-shadow 0.3s;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        /* Matrix (Hacker) background animation */
+        .matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: black;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            opacity: 0.3; /* Increased opacity for hacker animation */
+        }
+
+        /* Detective Image Background */
+        .detective-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url(img.jpg); /* Replace with your detective image URL */
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: detectiveFadeIn 2s forwards;
+        }
+
+        @keyframes detectiveFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #inputSection {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+
+        /* Mission Accomplished Box */
+        .mission-box {
+            background-color: black;
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            font-size: 24px;
+        }
+
+        .thank-you-message {
+            font-size: 30px;
+            color: #4CAF50;
+            font-weight: bold;
+            animation: thankYouAnimation 2s ease-in-out;
+        }
+
+        @keyframes thankYouAnimation {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="page1">
+        <h1>Hello SPY P07</h1>
+        <h3>From: Agent Billa</h3>
+        <button class="btn" onclick="nextPage(1)">Start Mission</button>
+    </div>
+
+    <div id="page2" class="hidden">
+        <h2 style="color: #fff;">Mission: Gather information about Aanya</h2>
+        <div class="card fade-in">
+            <h3>Is Aanya lazy?</h3>
+            <div id="inputSection">
+                <textarea id="aanyaDescription" placeholder="Describe Aanya's behavior..."></textarea>
+                <br>
+                <button class="btn" onclick="submitDescription()">Submit Description</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page3" class="hidden">
+        <!-- Mission Accomplished Box -->
+        <div class="mission-box">
+            <h1 class="thank-you-message">Mission Accomplished!</h1>
+            <h2>Thank You, Spy!</h2>
+        </div>
+    </div>
+
+    <div id="detectiveBackground" class="hidden detective-background"></div> <!-- Detective background -->
+
+    <div class="matrix">
+        <canvas id="matrixCanvas"></canvas> <!-- Hacker animation -->
+    </div>
+
+    <script>
+        // GitHub API Token and Repository Info
+        const token = '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'; // Replace with your GitHub token
+        const repoOwner = 'Rutwik2006';             // Replace with your GitHub username
+        const repoName = 'spy2006';              // Replace with your GitHub repository name
+        const issueNumber = 1;                                // Replace with the issue number where you want to post the comment
+
+
+        // Matrix (Hacker) background animation
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        const drops = Array.from({ length: columns }).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0';
+            ctx.font = `${fontSize}px monospace`;
+
+            drops.forEach((y, index) => {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                const x = index * fontSize;
+                ctx.fillText(text, x, y * fontSize);
+
+                if (y * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[index] = 0;
+                }
+                drops[index]++;
+            });
+        }
+
+        setInterval(drawMatrix, 50);
+
+        // Page navigation and card interactions
+        function nextPage(page) {
+            document.getElementById('page' + page).classList.add('hidden');
+            document.getElementById('page' + (page + 1)).classList.remove('hidden');
+        }
+
+        function submitDescription() {
+            const description = document.getElementById('aanyaDescription').value;
+            if (description) {
+                // Prepare the payload to be sent to GitHub API
+                const payload = {
+                    body: description, // This is the user input you want to send as a comment
+                };
+
+                // Send a POST request to GitHub API to add a comment on the issue
+                fetch(`https://api.github.com/repos/Rutwik2006/spy2006/issues/1/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token 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`, // Use the token for authentication
+                        'Content-Type': 'application/json', // Set content type as JSON
+                    },
+                    body: JSON.stringify(payload), // Send the comment body (description)
+                })
+                .then(response => response.json()) // Parse the JSON response
+                .then(data => {
+                    if (data.id) {
+                        // Success: Comment added
+                        console.log('Comment added successfully:', data);
+                        // Remove hacker animation and show detective background
+                        document.querySelector('.matrix').style.display = 'none'; // Hide hacker background
+                        document.getElementById('detectiveBackground').classList.remove('hidden'); // Show detective background
+                        // Hide current page and show mission accomplished page
+                        document.getElementById('page2').classList.add('hidden');
+                        document.getElementById('page3').classList.remove('hidden');
+                    } else {
+                        console.error('Error adding comment:', data);
+                        alert('Failed to submit the comment. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while submitting the comment. Please try again.');
+                });
+            } else {
+                alert('Please enter a description of Aanya.');
+            }
+        }
+    </script>
+</body>
+</html>
